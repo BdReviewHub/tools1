@@ -1,13 +1,12 @@
 // ============================================
 // ⚠️ ADMIN CONFIGURATION AREA
 // ============================================
-
 const CONFIG = {
-    // 1. লগন/রেজিস্ট্রেশন লিংক (আপনার আগেরটা - যেটা কাজ করছে)
+    // 1. OLD SCRIPT URL (Login/Registration) - এখানে আপনার আগের লিংকটি বসান
     authScriptURL: "https://script.google.com/macros/s/AKfycbxu23YNqJbDImYa8SFexSz-1SWKRrgkjx2xEM1Dazo-jb8t1PHosE15qkK3b3zDl7g7yA/exec", 
 
-    // 2. VIP কোড চেক করার লিংক (নতুন শিটের লিংকটি এখানে দেবেন)
-    vipScriptURL: "https://script.google.com/macros/s/AKfycbxeKFiA2RqVmZDR8anN6L6624P5Q-yNyQ2ODiuQN4-i8k2IZSY9saWvUasafLGr1QWUMA/exec",
+    // 2. NEW SCRIPT URL (VIP Codes) - এখানে নতুন শিটের লিংকটি বসান
+    vipScriptURL: "https://script.google.com/macros/s/AKfycbx1XbbV0fxb0u6CJLYVx1ItygI-cjCKng4fetKTRNVvd0lO-YYjCOyFH3Jgsxy03NgHxA/exec",
 
     // --- OTHER SETTINGS ---
     noticeText: "🚀 Welcome to ProToolsHub! 🔥 Get 50% OFF on Yearly Plan! ⚡ Instant Activation with Bkash/Nagad.",
@@ -17,7 +16,8 @@ const CONFIG = {
         { title: "CPA Marketing", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80" },
         { title: "Ethical Hacking", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&q=80" },
         { title: "Advance Data Entry", image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500&q=80" },
-        { title: "Python Automation", image: "https://images.unsplash.com/photo-1515879433056-bfab115c18e9?w=500&q=80" }
+        { title: "Python Automation", image: "https://images.unsplash.com/photo-1515879433056-bfab115c18e9?w=500&q=80" },
+        { title: "Email Secret Master", image: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=500&q=80" },
     ]
 };
 
@@ -33,6 +33,7 @@ window.onload = function() {
 };
 
 function setupSite() {
+    // Logo & Notice
     const imgLogo = document.getElementById('imgLogo');
     const textLogo = document.getElementById('textLogo');
     if (CONFIG.useImageLogo && CONFIG.logoImageURL) {
@@ -41,6 +42,7 @@ function setupSite() {
     
     document.getElementById('noticeText').innerText = CONFIG.noticeText;
 
+    // Load Marquee
     const courseHTML = [...CONFIG.courses, ...CONFIG.courses].map(course => `
         <div class="marquee-item group relative">
             <img src="${course.image}" alt="${course.title}">
@@ -76,35 +78,43 @@ function checkLoginStatus() {
 function updatePlanBadge(plan) {
     const badge = document.getElementById('userPlanBadge');
     const dashPlan = document.getElementById('dashUserPlan');
-    const statusText = (!plan || plan === 'Free') ? "Locked 🔒" : `${plan} ✅`;
-    const badgeColor = (!plan || plan === 'Free') ? "text-red-400 border-red-500/20 bg-red-500/10" : "text-green-400 border-green-500/20 bg-green-500/10";
+    const isPremium = (plan && plan !== 'Free');
     
-    badge.innerText = (!plan || plan === 'Free') ? "FREE" : "PREMIUM";
-    badge.className = `hidden md:inline-block text-[10px] px-2 py-0.5 rounded border font-mono font-bold ${badgeColor}`;
+    badge.innerText = isPremium ? "PREMIUM" : "FREE";
+    badge.className = `hidden md:inline-block text-[10px] px-2 py-0.5 rounded border font-mono font-bold ${isPremium ? "text-green-400 border-green-500/20 bg-green-500/10" : "text-red-400 border-red-500/20 bg-red-500/10 animate-pulse"}`;
     badge.classList.remove('hidden');
-    dashPlan.innerText = statusText;
-    dashPlan.className = (!plan || plan === 'Free') ? "text-red-400 font-bold" : "text-green-400 font-bold";
+    
+    dashPlan.innerText = isPremium ? `${plan} ✅` : "Locked 🔒";
+    dashPlan.className = isPremium ? "text-green-400 font-bold" : "text-red-400 font-bold";
+
+    const iconClass = isPremium ? "ph-arrow-square-out text-green-400" : "ph-lock-key text-gray-500";
+    ['ua', 'email', 'validator', 'number', 'address'].forEach(id => {
+        const icon = document.getElementById(`lockIcon_${id}`);
+        if(icon) icon.className = `ph ${iconClass} transition`;
+    });
 }
 
-// === CHECK ACCESS (LOCK LOGIC) ===
+// === ACCESS CHECK LOGIC (LOCK TOOLS) ===
 function checkAccess(toolId) {
     const user = JSON.parse(localStorage.getItem('proToolsUser'));
-    if (!user || !user.plan || user.plan === 'Free') {
+    if (!user || !user.isLoggedIn) {
+        alert("Please Login First!"); return;
+    }
+    // If Plan is Free, Show Lock Modal
+    if (!user.plan || user.plan === 'Free') {
         document.getElementById('lockModal').classList.remove('hidden');
     } else {
         loadTool(toolId);
     }
 }
 
-// === REDEEM CODE FUNCTION (Uses NEW VIP Script) ===
+// === REDEEM CODE LOGIC (Uses NEW Script) ===
 function redeemVipCode() {
     const codeInput = document.getElementById('vipCodeInput');
     const code = codeInput.value.trim();
-    
     const user = JSON.parse(localStorage.getItem('proToolsUser'));
-    if (!user || !user.isLoggedIn) {
-        alert("Please login first!"); return;
-    }
+    
+    if (!user || !user.isLoggedIn) { alert("Please login first!"); return; }
     if (!code) { alert("⚠️ Please enter a code!"); return; }
 
     const btn = document.querySelector('#vipCodeInput + button');
@@ -112,24 +122,18 @@ function redeemVipCode() {
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    // Send data to NEW VIP Script
     const data = new URLSearchParams();
     data.append('action', 'redeem');
     data.append('email', user.email);
     data.append('code', code);
 
-    // Note: Using CONFIG.vipScriptURL here
     fetch(CONFIG.vipScriptURL, { method: 'POST', body: data })
     .then(res => res.json())
     .then(result => {
         if (result.result === 'success') {
             alert(`✅ Success! Plan Updated to: ${result.newPlan}`);
-            
-            // Update Local Data
             user.plan = result.newPlan;
             localStorage.setItem('proToolsUser', JSON.stringify(user));
-            
-            // Update UI
             updatePlanBadge(result.newPlan);
             document.getElementById('lockModal').classList.add('hidden');
             codeInput.value = "";
@@ -137,14 +141,8 @@ function redeemVipCode() {
             alert("❌ " + result.message);
         }
     })
-    .catch(err => {
-        alert("❌ Network Error or Invalid Script URL!");
-        console.error(err);
-    })
-    .finally(() => {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    });
+    .catch(err => { alert("❌ Network/Server Error!"); console.error(err); })
+    .finally(() => { btn.innerText = originalText; btn.disabled = false; });
 }
 
 function loadTool(toolId) {
@@ -176,7 +174,7 @@ function generateData() {
     }, 700);
 }
 
-// === AUTH FUNCTIONS (Uses OLD Login Script) ===
+// === AUTH LOGIC (Uses OLD Script) ===
 function showSection(sectionId) {
     if(sectionId === 'dashboard' && isLoggedIn) {
         document.getElementById('home-section').classList.add('hidden');
@@ -221,7 +219,7 @@ function handleAuth(event, action) {
     const data = new URLSearchParams(); data.append('action', action);
     for (const pair of formData) data.append(pair[0], pair[1]);
     
-    // Note: Using CONFIG.authScriptURL here
+    // Uses AUTH SCRIPT URL
     fetch(CONFIG.authScriptURL, { method: 'POST', body: data }).then(res => res.json()).then(result => {
         msgDiv.classList.remove('hidden');
         if (result.result === 'success') {
@@ -240,4 +238,3 @@ function handleAuth(event, action) {
     }).catch(err => { msgDiv.innerText = "Connection Failed."; }).finally(() => { btn.innerText = originalText; btn.disabled = false; });
 }
 function logout() { localStorage.removeItem('proToolsUser'); location.reload(); }
-
