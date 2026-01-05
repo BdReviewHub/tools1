@@ -7,7 +7,7 @@ const CONFIG = {
     authScriptURL: "https://script.google.com/macros/s/AKfycbxu23YNqJbDImYa8SFexSz-1SWKRrgkjx2xEM1Dazo-jb8t1PHosE15qkK3b3zDl7g7yA/exec", 
 
     // 2. VIP কোড চেক করার লিংক (নতুন শিটের লিংকটি এখানে দেবেন)
-    vipScriptURL: "https://script.google.com/macros/s/AKfycbx1XbbV0fxb0u6CJLYVx1ItygI-cjCKng4fetKTRNVvd0lO-YYjCOyFH3Jgsxy03NgHxA/exec",
+    vipScriptURL: "https://script.google.com/macros/s/AKfycbxeKFiA2RqVmZDR8anN6L6624P5Q-yNyQ2ODiuQN4-i8k2IZSY9saWvUasafLGr1QWUMA/exec",
 
     // --- OTHER SETTINGS ---
     noticeText: "🚀 Welcome to ProToolsHub! 🔥 Get 50% OFF on Yearly Plan! ⚡ Instant Activation with Bkash/Nagad.",
@@ -240,3 +240,4 @@ function handleAuth(event, action) {
     }).catch(err => { msgDiv.innerText = "Connection Failed."; }).finally(() => { btn.innerText = originalText; btn.disabled = false; });
 }
 function logout() { localStorage.removeItem('proToolsUser'); location.reload(); }
+
